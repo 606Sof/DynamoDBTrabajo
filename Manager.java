@@ -79,4 +79,26 @@ public class Manager {
 		}
 		tablaRestaurante.updateItem(buscado);
 	}
+	/**
+	 * 
+	 * @param telefono
+	 * @param CIF
+	 * @param dni
+	 * @return
+	 */
+	public boolean actualizarTrabajador(String telefono, String CIF, String dni) {
+	    Restaurante buscado = getRestaurante(CIF);
+	    if(buscado!=null) {
+	    	for(Trabajador t : buscado.getTrabajadores()) {
+	    		if(t.getDni().equals(dni)) {
+	    			t.setTelefono(telefono);
+	    			tablaRestaurante.updateItem(buscado);
+	    			return true;
+	    		}
+	    	}
+	    }else {
+	    	LOG.warn("No se ha encontrado el restaurante con CIF["+CIF+"]");
+	    }
+	    return false;
+	}
 }
