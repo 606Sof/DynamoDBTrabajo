@@ -50,7 +50,20 @@ public class Manager {
 		tablaRestaurante.putItem(restaurante);
 		LOG.info("Se ha insertado con exito el restaurante");
 	}
-
+	/**
+	 * 
+	 * @param CIF
+	 */
+	public void borrarRestaurante(String CIF) {
+		Restaurante buscado = getRestaurante(CIF);
+		
+		if(buscado!=null) {
+			tablaRestaurante.deleteItem(Key.builder().partitionValue(AttributeValue.fromS(CIF)).build());
+			LOG.info("Se ha eliminado el restaurante con CIF["+CIF+"]");
+		}else {
+			LOG.warn("No existe restaurante con el CIF["+CIF+"]");
+		}
+	}
 	/**
 	 * 
 	 * @param CIF
