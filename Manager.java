@@ -1,8 +1,12 @@
 package es.aad;
 
+import java.util.Iterator;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import es.restaurantes.Reserva;
 import es.restaurantes.Restaurante;
 import es.restaurantes.Trabajador;
 import software.amazon.awssdk.auth.credentials.AwsSessionCredentials;
@@ -11,10 +15,10 @@ import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
+import software.amazon.awssdk.enhanced.dynamodb.model.TransactWriteItemsEnhancedRequest;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
-
 
 public class Manager {
 	private final static Logger LOG = LoggerFactory.getLogger(Manager.class);
@@ -50,27 +54,13 @@ public class Manager {
 		tablaRestaurante.putItem(restaurante);
 		LOG.info("Se ha insertado con exito el restaurante");
 	}
-	/**
-	 * 
-	 * @param CIF
-	 */
-	public void borrarRestaurante(String CIF) {
-		Restaurante buscado = getRestaurante(CIF);
-		
-		if(buscado!=null) {
-			tablaRestaurante.deleteItem(Key.builder().partitionValue(AttributeValue.fromS(CIF)).build());
-			LOG.info("Se ha eliminado el restaurante con CIF["+CIF+"]");
-		}else {
-			LOG.warn("No existe restaurante con el CIF["+CIF+"]");
-		}
-	}
+
 	/**
 	 * 
 	 * @param CIF
 	 */
 	public Restaurante getRestaurante(String CIF) {
 		Restaurante buscado = tablaRestaurante.getItem(Key.builder().partitionValue(AttributeValue.fromS(CIF)).build());
-		
 		if(buscado != null) {
 			LOG.debug("Se ha encontrado el restaurante [" + buscado.getNombre() + "].");
 		} else {
@@ -78,6 +68,35 @@ public class Manager {
 		}
 		return buscado;
 	}
+	
+	/**
+	 * @param CIF
+	 */
+	public void mostrarTrabajadoresRestaurante(String CIF) {
+		Restaurante r = getRestaurante(CIF);
+		LOG.info("Informacion del restaurante con CIF " + CIF + " \n"  + r.toString());
+		LOG.info("Los trabajadores de este restaurante son ");
+		int contador = 1;
+		for (Trabajador t : r.getTrabajadores()) {	
+			LOG.info("Trabajador " + contador + "\n " + t.toString());
+			contador++;
+		}
+	}
+	
+	/**
+	 * 
+	 * @param CIF
+	 */
+	public void borrarRestaurante(String CIF) {
+		Restaurante buscado = getRestaurante(CIF);
+		if(buscado!=null) {
+			tablaRestaurante.deleteItem(Key.builder().partitionValue(AttributeValue.fromS(CIF)).build());
+			LOG.info("Se ha eliminado el restaurante con CIF["+CIF+"]");
+		}else {
+			LOG.warn("No existe restaurante con el CIF["+CIF+"]");
+		}
+	}
+	
 	/**
 	 * 
 	 * @param trabajador
@@ -121,7 +140,6 @@ public class Manager {
 	 */
 	public void insertarReserva(String CIF, Reserva reserva) {
 		Restaurante buscado = getRestaurante(CIF);
-		
 		if(buscado!=null) {
 			buscado.getReservas().add(reserva);
 			tablaRestaurante.updateItem(buscado);
@@ -154,21 +172,18 @@ public class Manager {
 		}
 		return false;
 	}
-
-	private static void insertTrans(List<Restaurante> restaurantes) 
+	
+	public void insertTrans(List<Restaurante> restaurantes) 
 	{
 		TransactWriteItemsEnhancedRequest request =  crearRequest(restaurantes);	    
-	    	enhancedClient.transactWriteItems(request);    
+	    	cliente.transactWriteItems(request);    
 	}
 	
-	private static TransactWriteItemsEnhancedRequest crearRequest(List<Restaurante> restaurantes) 
+	public TransactWriteItemsEnhancedRequest crearRequest(List<Restaurante> restaurantes) 
 	{
 		TransactWriteItemsEnhancedRequest.Builder request = TransactWriteItemsEnhancedRequest.builder();
-		
 		for(Restaurante r : restaurantes)
-			request.addPutItem(tablaRestaurante, r);
-		
+			request.addPutItem(tablaRestaurante, r);	
 		return request.build();
 	}
-	
 }
