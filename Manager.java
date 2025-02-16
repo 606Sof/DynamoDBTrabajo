@@ -49,17 +49,6 @@ public class Manager {
 				.credentialsProvider(StaticCredentialsProvider.create(credentials))
 				.build();
 	}
-	
-	/**
-	 * Este metodo sirve para insertar un objeto Restaurante en la base de datos
-	 * @param restaurante = instancia del objeto restaurante que va a ser insertado
-	 */
-	public void insertarRestaurante(Restaurante restaurante) {
-		LOG.info("Se va a insertar el restaurante con CIF: [" + restaurante.getCif() + "]");
-		tablaRestaurante.putItem(restaurante);
-		LOG.info("Se ha insertado con exito el restaurante");
-	}
-
 	/**
 	 * Este metodo hace una consulta a la base de datos de un restaurante por su CIF (PK de la BD) y lo devuelve en caso de encontrarlo, en caso contrario devuelve null
 	 * @param CIF = cadena de texto referida a el CIF del Restaurante que se quiere buscar
@@ -102,21 +91,6 @@ public class Manager {
 		}else {
 			LOG.warn("No existe restaurante con el CIF["+CIF+"]");
 		}
-	}
-	
-	/**
-	 * Este metodo borra un trabajador de un restaurante pasado como parametro
-	 * @param trabajador = instancia de trabajador que quiere ser borrado
-	 * @param CIF = cadena de texto referida a el CIF del Restaurante del que se quiere borrar el trabajador
-	 */
-	public void borrarTrabajador(Trabajador trabajador, String CIF) {
-		Restaurante buscado = getRestaurante(CIF);
-		if(buscado.getTrabajadores().remove(trabajador)) {
-			LOG.info("Se va a borrar el trabajador con DNI: [" + trabajador.getDni() + "]");
-		} else {
-			LOG.warn("No se ha encontrado el trabajador a borrar");
-		}
-		tablaRestaurante.updateItem(buscado);
 	}
 	
 	/**
@@ -183,7 +157,6 @@ public class Manager {
 		}
 		return false;
 	}
-	
 	/**
 	 * Este metodo inserta de forma transaccional los restaurantes de la lista pasada como parametro
 	 * @param restaurantes = lista de instancias de Restaurante que se quiere insertar
@@ -202,7 +175,34 @@ public class Manager {
 	{
 		TransactWriteItemsEnhancedRequest.Builder request = TransactWriteItemsEnhancedRequest.builder();
 		for(Restaurante r : restaurantes)
-			request.addPutItem(tablaRestaurante, r);	
+			request.addPutItem(tablaRestaurante, r);
 		return request.build();
+	}
+	
+	/*-----------------------METODOS NO USADOS EN EL MAIN, PERO UTILES EN FUTUROS PROGRAMAS-------------------------------------*/
+	
+	/**
+	 * Este metodo borra un trabajador de un restaurante pasado como parametro
+	 * @param trabajador = instancia de trabajador que quiere ser borrado
+	 * @param CIF = cadena de texto referida a el CIF del Restaurante del que se quiere borrar el trabajador
+	 */
+	public void borrarTrabajador(Trabajador trabajador, String CIF) {
+		Restaurante buscado = getRestaurante(CIF);
+		if(buscado.getTrabajadores().remove(trabajador)) {
+			LOG.info("Se va a borrar el trabajador con DNI: [" + trabajador.getDni() + "]");
+		} else {
+			LOG.warn("No se ha encontrado el trabajador a borrar");
+		}
+		tablaRestaurante.updateItem(buscado);
+	}
+	
+	/**
+	 * Este metodo sirve para insertar un objeto Restaurante en la base de datos
+	 * @param restaurante = instancia del objeto restaurante que va a ser insertado
+	 */
+	public void insertarRestaurante(Restaurante restaurante) {
+		LOG.info("Se va a insertar el restaurante con CIF: [" + restaurante.getCif() + "]");
+		tablaRestaurante.putItem(restaurante);
+		LOG.info("Se ha insertado con exito el restaurante");
 	}
 }
