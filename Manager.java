@@ -157,7 +157,7 @@ public class Manager {
 
 	private static void insertTrans(List<Restaurante> restaurantes) 
 	{
-		TransactWriteItemsEnhancedRequest request =  crearRequest(restaurantes, tablaRestaurante);	    
+		TransactWriteItemsEnhancedRequest request =  crearRequest(restaurantes);	    
 	    	enhancedClient.transactWriteItems(request);    
 	}
 	
