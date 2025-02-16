@@ -20,11 +20,16 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 
+/**
+ * Esta clase se encarga de establecer la conexion y hacer uso de las operaciones CRUD en DynamoDB con varias clases referenciando a una tabla
+ * 
+ * @author Jorge C, Sofia U, Angel Z y Jaime T
+ */
 public class Manager {
 	private final static Logger LOG = LoggerFactory.getLogger(Manager.class);
 	private final static String NOM_TABLA = "Restaurantes";
-	private final static String KEY = "ASIAW5AXCLFPSEKL4BES";
-	private final static String SECRET_KEY = "SV8RSzk02NC4FU46wtAeH+eESHMnVzGsJGrHCMDC";
+	private final static String KEY = "ASIAW5AXCLFP4J2TX54K";
+	private final static String SECRET_KEY = "kzRkQwK1WMk09H9aYjr8B9YoWZT615/Z1F89bbq5";
 	private final static String SESSION_TOKEN = "";
 	private DynamoDbEnhancedClient cliente;
 	private DynamoDbTable<Restaurante> tablaRestaurante;
@@ -46,8 +51,8 @@ public class Manager {
 	}
 	
 	/**
-	 * 
-	 * @param restaurante
+	 * Este metodo sirve para insertar un objeto Restaurante en la base de datos
+	 * @param restaurante = instancia del objeto restaurante que va a ser insertado
 	 */
 	public void insertarRestaurante(Restaurante restaurante) {
 		LOG.info("Se va a insertar el restaurante con CIF: [" + restaurante.getCif() + "]");
@@ -56,8 +61,9 @@ public class Manager {
 	}
 
 	/**
-	 * 
-	 * @param CIF
+	 * Este metodo hace una consulta a la base de datos de un restaurante por su CIF (PK de la BD) y lo devuelve en caso de encontrarlo, en caso contrario devuelve null
+	 * @param CIF = cadena de texto referida a el CIF del Restaurante que se quiere buscar
+	 * @return el restaurante encontrado o null en caso de no existir
 	 */
 	public Restaurante getRestaurante(String CIF) {
 		Restaurante buscado = tablaRestaurante.getItem(Key.builder().partitionValue(AttributeValue.fromS(CIF)).build());
@@ -70,7 +76,8 @@ public class Manager {
 	}
 	
 	/**
-	 * @param CIF
+	 * Este metodo vuelca al log los trabajadores de un restaurante pasado por parametro
+	 * @param CIF = cadena de texto referida a el CIF del Restaurante que se quiere buscar para listar sus trabajadores
 	 */
 	public void mostrarTrabajadoresRestaurante(String CIF) {
 		Restaurante r = getRestaurante(CIF);
@@ -84,8 +91,8 @@ public class Manager {
 	}
 	
 	/**
-	 * 
-	 * @param CIF
+	 * Este metodo borra el restaurante que coincida con el CIF pasado por parametro en caso de existir
+	 * @param CIF = cadena de texto referida a el CIF del Restaurante que se quiere borrar
 	 */
 	public void borrarRestaurante(String CIF) {
 		Restaurante buscado = getRestaurante(CIF);
@@ -98,9 +105,9 @@ public class Manager {
 	}
 	
 	/**
-	 * 
-	 * @param trabajador
-	 * @param CIF
+	 * Este metodo borra un trabajador de un restaurante pasado como parametro
+	 * @param trabajador = instancia de trabajador que quiere ser borrado
+	 * @param CIF = cadena de texto referida a el CIF del Restaurante del que se quiere borrar el trabajador
 	 */
 	public void borrarTrabajador(Trabajador trabajador, String CIF) {
 		Restaurante buscado = getRestaurante(CIF);
@@ -111,12 +118,13 @@ public class Manager {
 		}
 		tablaRestaurante.updateItem(buscado);
 	}
+	
 	/**
-	 * 
-	 * @param telefono
-	 * @param CIF
-	 * @param dni
-	 * @return
+	 * Este metodo actualiza el telefono de un trabajador de un restaurante especifico
+	 * @param telefono = valor nuevo que se quiere dar al numero de telefono
+	 * @param CIF = cadena de texto referida a el CIF del Restaurante 
+	 * @param dni = cadena de texto referida al DNI del trabajador que se quiere modificar
+	 * @return True - en caso de haber actualizado correctamente el trabajador y False - en caso de no haberse actualizado
 	 */
 	public boolean actualizarTrabajador(String telefono, String CIF, String dni) {
 	    Restaurante buscado = getRestaurante(CIF);
@@ -133,10 +141,11 @@ public class Manager {
 	    }
 	    return false;
 	}
+	
 	/**
-	 * 
-	 * @param CIF
-	 * @param reserva
+	 * Este metodo inserta una instancia del objeto Reserva en un restaurante especificado por su CIF
+	 * @param CIF = cadena de texto referida a el CIF del Restaurante
+	 * @param reserva = instancia del objeto Reserva que se quiere insertar
 	 */
 	public void insertarReserva(String CIF, Reserva reserva) {
 		Restaurante buscado = getRestaurante(CIF);
@@ -148,10 +157,12 @@ public class Manager {
 			LOG.warn("No se ha encontrado el restaurante con CIF["+CIF+"]");
 		}
 	}
+	
 	/**
-	 * 
-	 * @param CIF
-	 * @param email
+	 * Este metodo borra una reserva en base a su email asociado 
+	 * @param CIF = cadena de texto referida a el CIF del Restaurante
+	 * @param email = cadena de texto referida al email de la reserva que se quiere borrar
+	 * @return True - si se ha encontrado y borrado la reserva o False - si no se ha econtrado o borrado la reserva 
 	 */
 	public boolean borrarReserva(String CIF, String email) {
 		Restaurante buscado = getRestaurante(CIF);
@@ -173,12 +184,20 @@ public class Manager {
 		return false;
 	}
 	
+	/**
+	 * Este metodo inserta de forma transaccional los restaurantes de la lista pasada como parametro
+	 * @param restaurantes = lista de instancias de Restaurante que se quiere insertar
+	 */
 	public void insertTrans(List<Restaurante> restaurantes) 
 	{
 		TransactWriteItemsEnhancedRequest request =  crearRequest(restaurantes);	    
 	    	cliente.transactWriteItems(request);    
 	}
-	
+	/**
+	 * Crea una peticion (request) usada para la insercion transaccional de instancias
+	 * @param restaurantes = lista de instancias de restaurantes que quiere ser insertada en la BD
+	 * @return el objeto TransactWriteItemsEnhancedRequest con el que se hara la insercion transaccional
+	 */
 	public TransactWriteItemsEnhancedRequest crearRequest(List<Restaurante> restaurantes) 
 	{
 		TransactWriteItemsEnhancedRequest.Builder request = TransactWriteItemsEnhancedRequest.builder();
