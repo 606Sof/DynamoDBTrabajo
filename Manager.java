@@ -101,4 +101,45 @@ public class Manager {
 	    }
 	    return false;
 	}
+	/**
+	 * 
+	 * @param CIF
+	 * @param reserva
+	 */
+	public void insertarReserva(String CIF, Reserva reserva) {
+		Restaurante buscado = getRestaurante(CIF);
+		
+		if(buscado!=null) {
+			buscado.getReservas().add(reserva);
+			tablaRestaurante.updateItem(buscado);
+			LOG.info("Se ha añadido la reserva correctamente");
+		}else {
+			LOG.warn("No se ha encontrado el restaurante con CIF["+CIF+"]");
+		}
+	}
+	/**
+	 * 
+	 * @param CIF
+	 * @param email
+	 */
+	public boolean borrarReserva(String CIF, String email) {
+		Restaurante buscado = getRestaurante(CIF);
+		if(buscado!=null) {
+			Iterator<Reserva> i = buscado.getReservas().iterator();
+			while(i.hasNext()) {
+				Reserva r = i.next();
+				
+				if(r.getEmail().equals(email)) {
+					i.remove();
+					tablaRestaurante.updateItem(buscado);
+					LOG.info("Se ha borrado correctamente la reserva con el email["+email+"]");
+					return true;
+				}
+			}
+		}else {
+			LOG.warn("No se ha encontrado el restaurante con CIF["+CIF+"]");
+		}
+		return false;
+	}
+	
 }
