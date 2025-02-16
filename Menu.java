@@ -18,6 +18,7 @@ public class Menu {
 	public static void main(String[] args) {
 
 		int operacion;
+		int operacionCase4;
 		do {
 			menu();
 			operacion = comprobarInt(sc);
@@ -33,7 +34,20 @@ public class Menu {
 				eliminarRestaurante();
 				break;
 			case 4:
-
+				LOG.info("1. Informacion de un restaurante");
+				LOG.info("2. Informacion de los trabajadores de un restaurante");
+				operacionCase4 = comprobarInt(sc);
+				switch(operacionCase4) {
+				case 1: 
+						buscarRestaurante();
+						break;
+						
+				case 2:
+						buscarTrabajadores();
+						break;		
+				default:
+					LOG.warn("Elija una de las opciones posibles (1 o 2)");
+				}
 				break;
 			}
 		} while (operacion != 0);
