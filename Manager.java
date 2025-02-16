@@ -22,7 +22,7 @@ public class Manager {
 	private final static String KEY = "ASIAW5AXCLFPSEKL4BES";
 	private final static String SECRET_KEY = "SV8RSzk02NC4FU46wtAeH+eESHMnVzGsJGrHCMDC";
 	private final static String SESSION_TOKEN = "";
-			private DynamoDbEnhancedClient cliente;
+	private DynamoDbEnhancedClient cliente;
 	private DynamoDbTable<Restaurante> tablaRestaurante;
 	
 	public Manager() {
@@ -153,6 +153,22 @@ public class Manager {
 			LOG.warn("No se ha encontrado el restaurante con CIF["+CIF+"]");
 		}
 		return false;
+	}
+
+	private static void insertTrans(List<Restaurante> restaurantes) 
+	{
+		TransactWriteItemsEnhancedRequest request =  crearRequest(restaurantes, tablaRestaurante);	    
+	    	enhancedClient.transactWriteItems(request);    
+	}
+	
+	private static TransactWriteItemsEnhancedRequest crearRequest(List<Restaurante> restaurantes) 
+	{
+		TransactWriteItemsEnhancedRequest.Builder request = TransactWriteItemsEnhancedRequest.builder();
+		
+		for(Restaurante r : restaurantes)
+			request.addPutItem(tablaRestaurante, r);
+		
+		return request.build();
 	}
 	
 }
