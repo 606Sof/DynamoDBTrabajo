@@ -133,31 +133,6 @@ public class Manager {
 	}
 	
 	/**
-	 * Este metodo borra una reserva en base a su email asociado 
-	 * @param CIF = cadena de texto referida a el CIF del Restaurante
-	 * @param email = cadena de texto referida al email de la reserva que se quiere borrar
-	 * @return True - si se ha encontrado y borrado la reserva o False - si no se ha econtrado o borrado la reserva 
-	 */
-	public boolean borrarReserva(String CIF, String email) {
-		Restaurante buscado = getRestaurante(CIF);
-		if(buscado!=null) {
-			Iterator<Reserva> i = buscado.getReservas().iterator();
-			while(i.hasNext()) {
-				Reserva r = i.next();
-				
-				if(r.getEmail().equals(email)) {
-					i.remove();
-					tablaRestaurante.updateItem(buscado);
-					LOG.info("Se ha borrado correctamente la reserva con el email["+email+"]");
-					return true;
-				}
-			}
-		}else {
-			LOG.warn("No se ha encontrado el restaurante con CIF["+CIF+"]");
-		}
-		return false;
-	}
-	/**
 	 * Este metodo inserta de forma transaccional los restaurantes de la lista pasada como parametro
 	 * @param restaurantes = lista de instancias de Restaurante que se quiere insertar
 	 */
@@ -204,5 +179,30 @@ public class Manager {
 		LOG.info("Se va a insertar el restaurante con CIF: [" + restaurante.getCif() + "]");
 		tablaRestaurante.putItem(restaurante);
 		LOG.info("Se ha insertado con exito el restaurante");
+	}
+	/**
+	 * Este metodo borra una reserva en base a su email asociado 
+	 * @param CIF = cadena de texto referida a el CIF del Restaurante
+	 * @param email = cadena de texto referida al email de la reserva que se quiere borrar
+	 * @return True - si se ha encontrado y borrado la reserva o False - si no se ha econtrado o borrado la reserva 
+	 */
+	public boolean borrarReserva(String CIF, String email) {
+		Restaurante buscado = getRestaurante(CIF);
+		if(buscado!=null) {
+			Iterator<Reserva> i = buscado.getReservas().iterator();
+			while(i.hasNext()) {
+				Reserva r = i.next();
+				
+				if(r.getEmail().equals(email)) {
+					i.remove();
+					tablaRestaurante.updateItem(buscado);
+					LOG.info("Se ha borrado correctamente la reserva con el email["+email+"]");
+					return true;
+				}
+			}
+		}else {
+			LOG.warn("No se ha encontrado el restaurante con CIF["+CIF+"]");
+		}
+		return false;
 	}
 }
