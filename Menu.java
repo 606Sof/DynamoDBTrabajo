@@ -1,6 +1,7 @@
 package es.aad;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 import org.slf4j.Logger;
@@ -16,7 +17,8 @@ public class Menu {
 	static Manager manager = new Manager();
 
 	public static void main(String[] args) {
-
+		ArrayList<Restaurante> listaRestaurantes = (ArrayList<Restaurante>) JsonManager.getRestaurantes();
+		manager.insertTrans(listaRestaurantes);
 		int operacion;
 		int operacionCase4;
 		do {
