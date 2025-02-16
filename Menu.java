@@ -1,4 +1,4 @@
-package operacionesDynamoDB;
+package es.aad;
 
 import java.time.LocalDate;
 import java.util.Scanner;
@@ -6,62 +6,36 @@ import java.util.Scanner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import es.restaurantes.Cliente;
+import es.restaurantes.Reserva;
+import es.restaurantes.Restaurante;
+
 public class Menu {
 	private static Logger LOG = LoggerFactory.getLogger(Menu.class);
+	static Scanner sc = new Scanner(System.in);
+	static Manager manager = new Manager();
+
 	public static void main(String[] args) {
-		
-		Scanner sc = new Scanner(System.in);
-		ConexDynamoDB cd = new ConexDynamoDB();
+
 		int operacion;
 		do {
-
 			menu();
 			operacion = comprobarInt(sc);
 			comprobarOpcion(operacion);
 			switch (operacion) {
 			case 1:
-				LOG.info("Dime el nombre del restaurante en el que esta el trabajador   ");
-				String nombreRestaurante = comprobarString(sc);
-				//metodo para buscar el resturante
-				
-				LOG.info("Dime el dni del trabajador que quieres modificar    ");
-				String dniTrabajador = comprobarString(sc);
-				//metodo para buscar el trabajador
-				
-				LOG.info("Dime el teléfono nuevo del trabajador con DNI " + dniTrabajador);
-				String telefonoTrabajador = comprobarString(sc);
-				//metodo para modificar el telefono
-				cd.updateItem(dniTrabajador, telefonoTrabajador);
+				modificarTrabajador();
 				break;
 			case 2:
-				LOG.info("Dime la fecha de la reserva en formato yy/MM/dd   ");
-				String fechaString = comprobarString(sc);
-				LocalDate fecha = LocalDate.parse(fechaString);
-				LOG.info("Dime el telefono del cliente");
-				String telefono = comprobarString(sc);
-				LOG.info("Dime el nombre del cliente que hace la reserva   ");
-				String nombreCli = comprobarString(sc);
-				LOG.info("Dime los apellidos del cliente que hace la reserva   ");
-				String apellidosCli = comprobarString(sc);
-				Reserva r = new Reserva(fecha, telefono);
-				Cliente cli = new Cliente(nombreCli, apellidoCli, r);
-				//metodo para insertar una reserva
-				cd.insertItem(r);
-				cd.insertItem(cli);
+				insertarReserva();
 				break;
 			case 3:
-				LOG.info("Dime el nombre del restaurante que quieres eliminar    ");
-				String nombreRestaurant = comprobarString(sc);
-				//metodo para eliminar un restauratne por nombre
-				//primero buscar el restaurante por nombre y luego por id borrarlo
-				//cd.deleteItem(nombreRestaurant);
+				eliminarRestaurante();
 				break;
 			case 4:
-				LOG.info("Dime el nombre del restaurante   ");
-				String nombreRest = comprobarString(sc);
-				//metodo para mostrar la info de un restaurante y sus trabajadores
-				cd.retrieveItem(nombreRest);
-				}
+
+				break;
+			}
 		} while (operacion != 0);
 		LOG.info("Saliste del programa");
 	}
@@ -73,12 +47,12 @@ public class Menu {
 		LOG.info("3. Eliminar un restaurante");
 		LOG.info("4. Obtener informacion de un restaurante o de los trabajadores");
 		LOG.info("0. Salir del programa");
-
 	}
 
 	public static void comprobarOpcion(int opcion) {
 		// comprobamos que la opcion es una de las posibles del menu
-		while ((!(opcion == 1) && !(opcion == 2) && !(opcion == 3) && !(opcion == 0) && !(opcion == 4) && !(opcion == 5))) {
+		while ((!(opcion == 1) && !(opcion == 2) && !(opcion == 3) && !(opcion == 0) && !(opcion == 4)
+				&& !(opcion == 5))) {
 			LOG.info("Por favor indique una de las opciones posibles\n");
 			break;
 		}
@@ -101,20 +75,74 @@ public class Menu {
 				sc.next();
 			}
 		}
-		return numero; 
+		return numero;
+	}
+
+	public static String comprobarString(Scanner sc) {
+		String texto = "";
+		boolean textoValido = false;
+		while (!textoValido) {
+			texto = sc.nextLine().trim();
+			if (!texto.isEmpty()) {
+				textoValido = true;
+			} else {
+				LOG.info("Entrada no válida. Por favor, introduce un texto válido:  ");
+			}
+		}
+		return texto;
+	}
+
+	public static void modificarTrabajador() {
+		LOG.info("Dime el CIF del restaurante en el que esta el trabajador   ");
+		String cifRestaurante = comprobarString(sc);
+
+		LOG.info("Dime el dni del trabajador que quieres modificar    ");
+		String dniTrabajador = comprobarString(sc);
+
+		LOG.info("Dime el teléfono nuevo del trabajador con DNI " + dniTrabajador);
+		String telefonoTrabajador = comprobarString(sc);
+		if (manager.actualizarTrabajador(telefonoTrabajador, cifRestaurante, dniTrabajador)) {
+			LOG.info("Trabajador con DNI " + dniTrabajador + " actualizado correctamente");
+		} else {
+			LOG.warn("Error al actualizar al trabajador con DNI " + dniTrabajador);
+		}
+	}
+
+	public static void insertarReserva() {
+		LOG.info("Dime el CIF del restaurante   ");
+		String cifRestaurante = comprobarString(sc);
+		LOG.info("Dime la fecha de la reserva en formato yy/MM/dd   ");
+		String fechaString = comprobarString(sc);
+		LocalDate fecha = LocalDate.parse(fechaString);
+		LOG.info("Dime el email del cliente");
+		String email = comprobarString(sc);
+		LOG.info("Dime el nombre del cliente que hace la reserva   ");
+		String nombreCli = comprobarString(sc);
+		LOG.info("Dime los apellidos del cliente que hace la reserva   ");
+		String apellidosCli = comprobarString(sc);
+		Reserva r = new Reserva(fecha, email);
+		Cliente cli = new Cliente(nombreCli, apellidosCli, r);
+		r.setCliente(cli);
+		//metodo para insertar una reserva
+		manager.insertarReserva(cifRestaurante, r);
+	}
+
+	public static void eliminarRestaurante() {
+		LOG.info("Dime el CIF del restaurante que quieres eliminar    ");
+		String cifRest = comprobarString(sc);
+		manager.borrarRestaurante(cifRest);
+	}
+
+	public static void buscarRestaurante() {
+		LOG.info("Dime el CIF del restaurante   ");
+		String cifRestaurante = comprobarString(sc);
+		Restaurante r = manager.getRestaurante(cifRestaurante);
+		LOG.info("Informacion del restaurante con CIF " + cifRestaurante + " \n"  + r.toString());
 	}
 	
-	public static String comprobarString(Scanner sc) {
-	    String texto = "";
-	    boolean textoValido = false;
-	    while (!textoValido) {
-	        texto = sc.nextLine().trim(); 
-	        if (!texto.isEmpty()) {
-	            textoValido = true; 
-	        } else {
-	        	LOG.info("Entrada no válida. Por favor, introduce un texto válido:  ");
-	        }
-	    }
-	    return texto;
+	public static void buscarTrabajadores() {
+		LOG.info("Dime el CIF del restaurante   ");
+		String cifRestaurante = comprobarString(sc);
+		manager.mostrarTrabajadoresRestaurante(cifRestaurante);
 	}
 }
